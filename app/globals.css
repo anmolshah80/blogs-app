@@ -142,4 +142,25 @@
 body {
   background: var(--background);
   color: var(--foreground);
+
+  min-height: 100dvh;
+}
+
+.spinner {
+  position: absolute;
+  animation: spinner 1s infinite linear;
+  left: 52%;
+  top: 40%;
+  width: 100px;
+  height: 100px;
+}
+
+@keyframes spinner {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
 }

@@ -8,6 +8,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 
+import BlogsNotFound from '@/components/blogs-not-found';
+
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
@@ -33,7 +35,7 @@ const PaginationControls = ({
       return [totalPages - 2, totalPages - 1, totalPages];
     }
 
-    return [1, currentPage, currentPage + 1];
+    return [currentPage - 1, currentPage, currentPage + 1];
   };
 
   const visiblePages = getVisiblePages();
@@ -46,6 +48,8 @@ const PaginationControls = ({
       handlePageChange(page);
     }
   };
+
+  if (currentPage > totalPages) return <BlogsNotFound />;
 
   return (
     <Pagination className="flex items-center justify-center space-x-2">
