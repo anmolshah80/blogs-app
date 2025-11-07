@@ -10,18 +10,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 import { cn } from '@/lib/utils';
 
-type TextFormFieldProps = {
+type TextAreaFormFieldProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   form: UseFormReturn<any, any, any>;
   fieldName: string;
   fieldId: string;
   label: string;
   maxLength?: number;
-  autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
   fieldHasErrors?: FieldError | undefined;
   placeholder?: string;
   fieldClassName?: ClassValue;
@@ -52,18 +51,17 @@ const ShowFormMessage = ({
   );
 };
 
-const TextFormField = ({
+const TextAreaFormField = ({
   form,
   fieldName,
   fieldId,
   label,
   fieldClassName,
   maxLength,
-  autoComplete,
   fieldDescription,
   fieldHasErrors,
   placeholder = 'Placeholder',
-}: TextFormFieldProps) => {
+}: TextAreaFormFieldProps) => {
   return (
     <FormField
       control={form.control}
@@ -74,7 +72,7 @@ const TextFormField = ({
             {label}
           </FormLabel>
           <FormControl>
-            <Input
+            <Textarea
               id={fieldId}
               className={cn(
                 'outline-none text-white/90 border border-input bg-transparent rounded h-9 px-3 placeholder-white/80 placeholder:text-sm',
@@ -82,7 +80,7 @@ const TextFormField = ({
               )}
               placeholder={placeholder}
               maxLength={maxLength}
-              autoComplete={autoComplete}
+              autoComplete="off"
               {...field}
             />
           </FormControl>
@@ -97,4 +95,4 @@ const TextFormField = ({
   );
 };
 
-export default TextFormField;
+export default TextAreaFormField;

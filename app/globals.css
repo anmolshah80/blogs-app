@@ -155,6 +155,10 @@ body {
   height: 100px;
 }
 
+.btn-spinner {
+  animation: spinner 1s infinite linear;
+}
+
 @keyframes spinner {
   0% {
     transform: translateX(-50%) rotate(0deg);
