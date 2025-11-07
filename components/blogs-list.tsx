@@ -25,8 +25,9 @@ const BlogsList = ({ currentPage = 1 }: BlogsListProps) => {
 
   if (error) {
     return (
-      <div className="mx-auto overflow-auto pb-2">
-        <p className="mx-auto max-w-130 rounded-lg p-4 text-center text-white/80">
+      <div className="flex items-center justify-center min-h-[70dvh] overflow-auto pb-2 min-w-full flex-col text-red-400">
+        <strong className="text-xl">Something went wrong</strong>
+        <p className="max-w-130 rounded-lg p-2 text-center text-white/80 text-base">
           An unexpected error has occurred, and the blogs could not be fetched.
         </p>
       </div>
