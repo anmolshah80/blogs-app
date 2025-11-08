@@ -3,9 +3,12 @@ import Link from 'next/link';
 const Header = () => {
   return (
     <header className="flex items-center justify-between w-full">
-      <span className="text-3xl xs:text-4xl sm:text-5xl text-white">
+      <Link
+        href="/"
+        className="text-3xl xs:text-4xl sm:text-5xl text-white hover:underline decoration-blue-300"
+      >
         Blogs App
-      </span>
+      </Link>
 
       <Link
         href="/blogs/create"
