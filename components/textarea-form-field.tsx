@@ -1,4 +1,3 @@
-import { HTMLInputAutoCompleteAttribute } from 'react';
 import { FieldError, UseFormReturn } from 'react-hook-form';
 import { ClassValue } from 'clsx';
 

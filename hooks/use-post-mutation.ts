@@ -61,8 +61,6 @@ const usePostMutation = (
 
       const responseData: TPostExtended = await response.json();
 
-      console.log('responseData: ', responseData);
-
       return responseData;
     },
     retry: false,

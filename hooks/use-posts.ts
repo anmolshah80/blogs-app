@@ -34,8 +34,6 @@ const usePosts = (): UsePostsReturn => {
 
       const responseData: TPost[] = await response.json();
 
-      console.log('responseData: ', responseData);
-
       return responseData;
     },
     staleTime: 60 * 60 * 1000,
