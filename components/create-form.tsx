@@ -3,7 +3,7 @@
 import * as z from 'zod/v4';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useRef } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { LoaderCircle } from 'lucide-react';
 
@@ -57,14 +57,11 @@ const CreateForm = () => {
     },
   });
 
-  const hasAlreadyRenderedToast = useRef(false);
-
   const mutation = usePostMutation('create_blog_post', 'POST');
 
   const { data, error, isPending, isSuccess, isError, mutate } = mutation;
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    // console.log('Form errors:', form.formState.errors);
     console.log('onSubmit form data: ', data);
 
     mutate({
@@ -73,14 +70,26 @@ const CreateForm = () => {
       category: data.blogCategory,
       userId: 1,
     });
-
-    if (isSuccess && !isError) {
-      toast.success('Your blog has been created!', {
-        closeButton: true,
-        duration: 5000,
-      });
-    }
   };
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    toast.success('Your blog has been created!', {
+      closeButton: true,
+      duration: 5000,
+    });
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (!isError) return;
+
+    toast.error('An error occurred while creating the blog post', {
+      description: error.message,
+      closeButton: true,
+      duration: 8000,
+    });
+  }, [isError, error?.message]);
 
   console.log('responseData (after POST): ', data);
   console.log('error (after POST): ', error);
@@ -96,16 +105,6 @@ const CreateForm = () => {
   const {
     formState: { errors, isSubmitting },
   } = form;
-
-  if (isError && !hasAlreadyRenderedToast.current) {
-    hasAlreadyRenderedToast.current = true;
-
-    toast.error('An error occurred while creating the blog post', {
-      description: error.message,
-      closeButton: true,
-      duration: 8000,
-    });
-  }
 
   return (
     <Form {...form}>
@@ -142,7 +141,7 @@ const CreateForm = () => {
             placeholder="React"
             fieldHasErrors={errors.blogCategory}
             fieldDescription={
-              <span className="flex items-center text-xs text-mauve11">
+              <span className="flex items-center text-xs">
                 Add comma-separated values such as React, Next.js, Tailwind CSS,
                 etc.
               </span>
@@ -154,9 +153,6 @@ const CreateForm = () => {
           type="submit"
           className="inline-flex px-8 py-5 items-center text-base justify-center rounded bg-black font-medium leading-none text-white outline-none outline-offset-1 hover:bg-(--ds-gray-100) focus-visible:outline-2 border-2 border-gray-700 cursor-pointer"
           disabled={isSubmitting || isPending}
-          onClick={() => {
-            hasAlreadyRenderedToast.current = false;
-          }}
         >
           {isSubmitting || isPending ? (
             <span className="flex items-center justify-center gap-5">
