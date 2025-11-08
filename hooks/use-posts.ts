@@ -7,20 +7,27 @@ import { JSONPLACEHOLDER_POSTS_API } from '@/lib/constants';
 import { TPost } from '@/lib/types';
 
 interface UsePostsReturn {
-  postsData: TPost[] | undefined;
+  postsData: TPost[] | TPost | undefined;
   isLoading: boolean;
   error: Error | null;
 }
 
-const usePosts = (): UsePostsReturn => {
+// Source -> https://tanstack.com/query/latest/docs/framework/react/guides/queries
+const usePosts = (postId?: number): UsePostsReturn => {
   const {
     data: postsData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['blog_posts'],
+    queryKey: ['blog_posts', postId],
     queryFn: async () => {
-      const response = await fetch(JSONPLACEHOLDER_POSTS_API);
+      let fetchUrl = JSONPLACEHOLDER_POSTS_API;
+
+      if (postId !== undefined) {
+        fetchUrl = `${JSONPLACEHOLDER_POSTS_API}/${postId}`;
+      }
+
+      const response = await fetch(fetchUrl);
 
       if (!response.ok) {
         const statusMessage = response.statusText
@@ -32,7 +39,7 @@ const usePosts = (): UsePostsReturn => {
         );
       }
 
-      const responseData: TPost[] = await response.json();
+      const responseData: TPost[] | TPost = await response.json();
 
       return responseData;
     },

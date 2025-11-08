@@ -9,7 +9,7 @@ import { TPost } from '@/lib/types';
 type RequestMethod = 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 type MutationKey = 'create_blog_post' | 'update_blog_post' | 'delete_blog_post';
 
-interface TPostExtended extends TPost {
+export interface TPostExtended extends TPost {
   category: string;
 }
 

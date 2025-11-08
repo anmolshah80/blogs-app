@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { SquarePen, Trash2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import BlogsListLoading from '@/components/blogs-list-loading';
 import PaginationControls from '@/components/pagination-controls';
@@ -9,7 +10,6 @@ import PaginationControls from '@/components/pagination-controls';
 import usePosts from '@/hooks/use-posts';
 
 import { MAX_RESULTS_PER_PAGE } from '@/lib/constants';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 type BlogsListProps = {
   currentPage: number | undefined;
@@ -21,7 +21,7 @@ const BlogsList = ({ currentPage = 1 }: BlogsListProps) => {
 
   const { postsData, isLoading, error } = usePosts();
 
-  if (isLoading || !postsData) return <BlogsListLoading />;
+  if (isLoading || !Array.isArray(postsData)) return <BlogsListLoading />;
 
   if (error) {
     return (
@@ -57,7 +57,7 @@ const BlogsList = ({ currentPage = 1 }: BlogsListProps) => {
               >
                 <article className="px-4 py-6 sm:px-8 sm:py-6 text-offWhite">
                   <Link
-                    href={'#'}
+                    href={`/blogs/${id}/edit`}
                     className="group/title flex gap-3 rounded-sm px-1 text-xl font-semibold outline-offset-4 outline-blue-500"
                   >
                     <span className="decoration-blue-400 decoration-2 underline-offset-2 group-hover/title:underline">
@@ -69,7 +69,7 @@ const BlogsList = ({ currentPage = 1 }: BlogsListProps) => {
 
                   <div className="flex gap-4 justify-between items-center mt-8 flex-wrap">
                     <Link
-                      href={'/:id/edit'}
+                      href={`/blogs/${id}/edit`}
                       className="text-base rounded-md text-white border-2 border-gray-700 bg-transparent hover:bg-(--ds-gray-100) px-8 py-2 flex gap-3 items-center justify-center"
                     >
                       <SquarePen

@@ -25,4 +25,11 @@ const getStatusText = (statusCode: number): string => {
   return statusMessages[statusCode] || '';
 };
 
-export { cn, getStatusText };
+/**
+ * Generates a random integer between 1 and 100 (inclusive)
+ *
+ * @returns {number} A random number from 1 to 100
+ */
+const generateRandomValue = (): number => Math.floor(Math.random() * 100) + 1;
+
+export { cn, getStatusText, generateRandomValue };

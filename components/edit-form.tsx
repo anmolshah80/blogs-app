@@ -12,8 +12,17 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import TextFormField from '@/components/text-form-field';
 import TextAreaFormField from '@/components/textarea-form-field';
+import BlogsListLoading from '@/components/blogs-list-loading';
 
 import usePostMutation from '@/hooks/use-post-mutation';
+import usePosts from '@/hooks/use-posts';
+
+import { generateRandomValue } from '@/lib/utils';
+import { TPost } from '@/lib/types';
+
+interface EditFormProps {
+  postId: number;
+}
 
 const FormSchema = z.object({
   blogTitle: z
@@ -48,7 +57,17 @@ const FormSchema = z.object({
     }),
 });
 
-const CreateForm = () => {
+const isSinglePost = (data: TPost[] | TPost | undefined): data is TPost => {
+  return data !== undefined && !Array.isArray(data);
+};
+
+const EditForm = ({ postId }: EditFormProps) => {
+  const {
+    postsData: postData,
+    isLoading: isPostLoading,
+    error: fetchPostError,
+  } = usePosts(postId);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -56,11 +75,16 @@ const CreateForm = () => {
       blogDescription: '',
       blogCategory: '',
     },
+    values: {
+      blogTitle: isSinglePost(postData) ? postData.title : '',
+      blogDescription: isSinglePost(postData) ? postData.body : '',
+      blogCategory: '',
+    },
   });
 
   const router = useRouter();
 
-  const mutation = usePostMutation('create_blog_post', 'POST');
+  const mutation = usePostMutation('update_blog_post', 'PATCH', postId);
 
   const { data, error, isPending, isSuccess, isError, mutate } = mutation;
 
@@ -76,37 +100,37 @@ const CreateForm = () => {
       title: data.blogTitle,
       body: data.blogDescription,
       category: data.blogCategory,
-      userId: 1,
-    });
-  };
-
-  useEffect(() => {
-    if (!isSuccess) return;
-
-    toast.success('Your blog has been created!', {
-      closeButton: true,
-      duration: 5000,
+      userId: generateRandomValue(),
     });
 
     // clear form field values and navigate to home page
     reset();
     router.push('/');
+  };
+
+  useEffect(() => {
+    if (!isSuccess) return;
+
+    toast.success('Your blog has been updated!', {
+      closeButton: true,
+      duration: 5000,
+    });
   }, [isSuccess]);
 
   useEffect(() => {
     if (!isError) return;
 
-    toast.error('An error occurred while creating the blog post', {
+    toast.error('An error occurred while updating the blog post', {
       description: error.message,
       closeButton: true,
       duration: 8000,
     });
   }, [isError, error?.message]);
 
-  console.log('responseData (after POST): ', data);
-  console.log('error (after POST): ', error);
+  console.log('responseData (after PATCH): ', data);
+  console.log('error (after PATCH): ', error);
   console.log(
-    'isPending (after POST): ',
+    'isPending (after PATCH): ',
     isPending,
     'isSuccess: ',
     isSuccess,
@@ -114,13 +138,27 @@ const CreateForm = () => {
     isError,
   );
 
+  if (isPostLoading) return <BlogsListLoading />;
+
+  if (fetchPostError) {
+    return (
+      <div className="py-16 flex flex-col items-center justify-center mx-auto min-h-[70dvh]">
+        <h2 className="mb-2 text-2xl font-medium">Blog post unavailable</h2>
+        <p className="italic text-muted-foreground">
+          We couldn't find the blog post you're looking for. Please try again
+          later.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-8 w-full max-w-140 items-center justify-center mx-auto mt-12"
       >
-        <h1 className="mr-auto text-4xl text-white/80">Create Post</h1>
+        <h1 className="mr-auto text-4xl text-white/80">Edit Post</h1>
 
         <div className="flex flex-col gap-6 md:gap-8 w-full">
           <TextFormField
@@ -178,4 +216,4 @@ const CreateForm = () => {
   );
 };
 
-export default CreateForm;
+export default EditForm;
