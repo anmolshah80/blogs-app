@@ -6,33 +6,33 @@ import prisma from '@/lib/db';
 import { TPost } from '@/lib/types';
 
 interface UsePostsReturn {
-  postsData: TPost[] | undefined;
+  postData: TPost | undefined;
   isLoading: boolean;
   error: Error | null;
 }
 
 // Source -> https://tanstack.com/query/latest/docs/framework/react/guides/queries
-const usePosts = (currentPage: number): UsePostsReturn => {
+const usePost = (postId: string): UsePostsReturn => {
   const {
-    data: postsData,
+    data: postData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['blog_posts', currentPage],
+    queryKey: ['blog_post', postId],
     queryFn: async () => {
-      const posts = await prisma.post.findMany({
-        orderBy: {
-          updatedAt: 'desc',
+      const post = await prisma.post.findUnique({
+        where: {
+          id: postId,
         },
-        take: 6,
-        skip: (currentPage - 1) * 6,
       });
 
-      if (!posts || posts.length === 0) {
-        throw new Error(`Error: 404, Blog posts could not be found`);
+      if (!post) {
+        throw new Error(
+          `Error: 404, Blog post with the ID ${postId} could not be found`,
+        );
       }
 
-      return posts;
+      return post;
     },
     staleTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -40,10 +40,10 @@ const usePosts = (currentPage: number): UsePostsReturn => {
   });
 
   return {
-    postsData,
+    postData,
     isLoading,
     error,
   } as const;
 };
 
-export default usePosts;
+export default usePost;

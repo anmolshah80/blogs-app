@@ -1,6 +1,15 @@
 export type TPost = {
   userId: number;
-  id: number;
+  description: string;
+  id: string;
   title: string;
-  body: string;
+  category: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type TUser = {
+  id: string;
+  email: string;
+  password: string;
 };

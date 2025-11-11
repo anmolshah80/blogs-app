@@ -2,8 +2,8 @@
 
 import * as z from 'zod/v4';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LoaderCircle } from 'lucide-react';
@@ -13,7 +13,9 @@ import { Button } from '@/components/ui/button';
 import TextFormField from '@/components/text-form-field';
 import TextAreaFormField from '@/components/textarea-form-field';
 
-import usePostMutation from '@/hooks/use-post-mutation';
+import { createPost } from '@/app/actions/actions';
+
+import { generateRandomValue } from '@/lib/utils';
 
 const FormSchema = z.object({
   blogTitle: z
@@ -49,6 +51,8 @@ const FormSchema = z.object({
 });
 
 const CreateForm = () => {
+  const [isPending, setIsPending] = useState(false);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -60,59 +64,50 @@ const CreateForm = () => {
 
   const router = useRouter();
 
-  const mutation = usePostMutation('create_blog_post', 'POST');
-
-  const { data, error, isPending, isSuccess, isError, mutate } = mutation;
-
   const {
     formState: { errors, isSubmitting },
     reset,
   } = form;
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log('onSubmit form data: ', data);
+    setIsPending(true);
 
-    mutate({
+    const createdPost = createPost({
       title: data.blogTitle,
-      body: data.blogDescription,
+      description: data.blogDescription,
       category: data.blogCategory,
-      userId: 1,
+      userId: generateRandomValue(),
+    });
+
+    createdPost.then((value) => {
+      // only one of the destructured properties will be accessible
+      // based on whether it is able to create a post or not
+      const { createdPostData, error } = value;
+
+      // if the post is created render a success toast
+      if (createdPostData !== undefined) {
+        toast.success('Your blog has been created!', {
+          closeButton: true,
+          duration: 5000,
+        });
+
+        // clear form field values and navigate to blogs page
+        reset();
+        router.push('/blogs');
+      }
+
+      // if there is issue while creating the post then render an error toast
+      if (error !== undefined) {
+        toast.error('An error occurred while creating the blog post', {
+          description: error,
+          closeButton: true,
+          duration: 10000,
+        });
+      }
+
+      setIsPending(false);
     });
   };
-
-  useEffect(() => {
-    if (!isSuccess) return;
-
-    toast.success('Your blog has been created!', {
-      closeButton: true,
-      duration: 5000,
-    });
-
-    // clear form field values and navigate to home page
-    reset();
-    router.push('/');
-  }, [isSuccess]);
-
-  useEffect(() => {
-    if (!isError) return;
-
-    toast.error('An error occurred while creating the blog post', {
-      description: error.message,
-      closeButton: true,
-      duration: 8000,
-    });
-  }, [isError, error?.message]);
-
-  console.log('responseData (after POST): ', data);
-  console.log('error (after POST): ', error);
-  console.log(
-    'isPending (after POST): ',
-    isPending,
-    'isSuccess: ',
-    isSuccess,
-    'isError: ',
-    isError,
-  );
 
   return (
     <Form {...form}>
