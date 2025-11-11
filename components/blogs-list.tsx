@@ -13,7 +13,7 @@ type BlogsListProps = {
 };
 
 const BlogsList = async ({ currentPage = 1 }: BlogsListProps) => {
-  const { postsData, error } = await getPosts(currentPage);
+  const { postsData, error } = await getPosts();
 
   const totalPostsCount = await prisma.post.count();
 
