@@ -91,7 +91,7 @@ const RegisterPage = () => {
       // if there is issue while updating the post then render an error toast
       if (error !== undefined) {
         if (error.toLowerCase().includes('unique constraint failed')) {
-          form.setError('email', {
+          setError('email', {
             type: 'email_already_exists',
             message: 'Account with this email already exists',
           });

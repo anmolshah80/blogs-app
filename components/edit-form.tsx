@@ -131,8 +131,8 @@ const EditForm = ({
       <div className="py-16 flex flex-col items-center justify-center mx-auto min-h-[70dvh]">
         <h2 className="mb-2 text-2xl font-medium">Blog post unavailable</h2>
         <p className="italic text-muted-foreground">
-          We couldn't find the blog post you're looking for. Please try again
-          later.
+          We couldn&apos;t find the blog post you&apos;re looking for. Please
+          try again later.
         </p>
       </div>
     );
