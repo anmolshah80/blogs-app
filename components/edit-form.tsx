@@ -2,8 +2,8 @@
 
 import * as z from 'zod/v4';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LoaderCircle } from 'lucide-react';
@@ -12,16 +12,15 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import TextFormField from '@/components/text-form-field';
 import TextAreaFormField from '@/components/textarea-form-field';
-import BlogsListLoading from '@/components/blogs-list-loading';
 
-import usePostMutation from '@/hooks/use-post-mutation';
-import usePosts from '@/hooks/use-posts';
+import { updatePost } from '@/app/actions/actions';
 
-import { generateRandomValue } from '@/lib/utils';
 import { TPost } from '@/lib/types';
 
 interface EditFormProps {
-  postId: number;
+  postId: string;
+  postData: TPost | undefined;
+  error: string | undefined;
 }
 
 const FormSchema = z.object({
@@ -57,16 +56,12 @@ const FormSchema = z.object({
     }),
 });
 
-const isSinglePost = (data: TPost[] | TPost | undefined): data is TPost => {
-  return data !== undefined && !Array.isArray(data);
-};
-
-const EditForm = ({ postId }: EditFormProps) => {
-  const {
-    postsData: postData,
-    isLoading: isPostLoading,
-    error: fetchPostError,
-  } = usePosts(postId);
+const EditForm = ({
+  postId,
+  postData,
+  error: fetchPostError,
+}: EditFormProps) => {
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -76,17 +71,13 @@ const EditForm = ({ postId }: EditFormProps) => {
       blogCategory: '',
     },
     values: {
-      blogTitle: isSinglePost(postData) ? postData.title : '',
-      blogDescription: isSinglePost(postData) ? postData.body : '',
-      blogCategory: '',
+      blogTitle: postData ? postData.title : '',
+      blogDescription: postData ? postData.description : '',
+      blogCategory: postData ? postData.category : '',
     },
   });
 
   const router = useRouter();
-
-  const mutation = usePostMutation('update_blog_post', 'PATCH', postId);
-
-  const { data, error, isPending, isSuccess, isError, mutate } = mutation;
 
   const {
     formState: { errors, isSubmitting },
@@ -94,53 +85,48 @@ const EditForm = ({ postId }: EditFormProps) => {
   } = form;
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log('onSubmit form data: ', data);
+    setIsPending(true);
 
-    mutate({
+    const updatedPost = updatePost(postId, {
       title: data.blogTitle,
-      body: data.blogDescription,
+      description: data.blogDescription,
       category: data.blogCategory,
-      userId: generateRandomValue(),
     });
 
-    // clear form field values and navigate to home page
-    reset();
-    router.push('/');
+    updatedPost.then((value) => {
+      // only one of the destructured properties will be accessible
+      // based on whether it is able to update a post or not
+      const { updatedPostData, error } = value;
+
+      // if the post is updated render a success toast
+      if (updatedPostData !== undefined) {
+        toast.success(`Your blog with ID ${postId} has been updated!`, {
+          closeButton: true,
+          duration: 5000,
+        });
+
+        // clear form field values and navigate to blogs page
+        reset();
+        router.push('/blogs');
+      }
+
+      // if there is issue while updating the post then render an error toast
+      if (error !== undefined) {
+        toast.error(
+          `An error occurred while updating the blog post with ID ${postId}`,
+          {
+            description: error,
+            closeButton: true,
+            duration: 10000,
+          },
+        );
+      }
+
+      setIsPending(false);
+    });
   };
 
-  useEffect(() => {
-    if (!isSuccess) return;
-
-    toast.success('Your blog has been updated!', {
-      closeButton: true,
-      duration: 5000,
-    });
-  }, [isSuccess]);
-
-  useEffect(() => {
-    if (!isError) return;
-
-    toast.error('An error occurred while updating the blog post', {
-      description: error.message,
-      closeButton: true,
-      duration: 8000,
-    });
-  }, [isError, error?.message]);
-
-  console.log('responseData (after PATCH): ', data);
-  console.log('error (after PATCH): ', error);
-  console.log(
-    'isPending (after PATCH): ',
-    isPending,
-    'isSuccess: ',
-    isSuccess,
-    'isError: ',
-    isError,
-  );
-
-  if (isPostLoading) return <BlogsListLoading />;
-
-  if (fetchPostError) {
+  if (fetchPostError || postData === undefined) {
     return (
       <div className="py-16 flex flex-col items-center justify-center mx-auto min-h-[70dvh]">
         <h2 className="mb-2 text-2xl font-medium">Blog post unavailable</h2>

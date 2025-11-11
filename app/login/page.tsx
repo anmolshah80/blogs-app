@@ -3,12 +3,13 @@
 import * as z from 'zod/v4';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LoaderCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import TextFormField from '@/components/text-form-field';
+
+import { login } from '@/app/api/auth/login/actions';
 
 // Source -> https://github.com/colinhacks/zod/discussions/3412#discussioncomment-9916377
 const passwordSchema = z
@@ -32,26 +33,39 @@ const LoginPage = () => {
 
   const {
     formState: { errors, isSubmitting },
+    setError,
   } = form;
 
-  const router = useRouter();
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    const loginData = await login(data);
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log('onSubmit form data: ', data);
+    if (loginData === undefined) return;
 
-    // navigate to home page after login
-    router.push('/');
+    const {
+      errors: {
+        email: { message, type, prismaErrorMessage },
+      },
+    } = loginData;
+
+    console.log('prismaErrorMessage: ', prismaErrorMessage);
+
+    setError('email', {
+      type: type,
+      message: message,
+    });
   };
 
   return (
     <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-8 xs:w-full xs:max-w-120 items-center justify-center mx-3 xs:mx-auto mt-12 sm:my-20 group rounded-lg border border-solid border-gray-500 bg-transparent px-3 xs:px-8 py-12"
+        className="flex flex-col gap-8 xs:w-full xs:max-w-120 items-center justify-center mx-3 xs:mx-auto sm:my-20 group rounded-lg sm:border border-solid border-gray-500 bg-transparent px-4 xs:px-8 py-6 xs:py-12 absolute inset-0 m-0 border-0 sm:static"
       >
-        <h1 className="mr-auto text-4xl font-semibold">Welcome back</h1>
-        <p className="text-white/80 mr-auto -mt-5 text-base">
-          Please enter your details
+        <h1 className="mr-auto text-4xl xs:text-5xl font-semibold">
+          Welcome back
+        </h1>
+        <p className="text-white/80 mr-auto -mt-5 text-base xs:text-xl">
+          Please enter your login details
         </p>
 
         <div className="flex flex-col gap-6 md:gap-8 w-full mb-5">
@@ -86,7 +100,7 @@ const LoginPage = () => {
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-5">
               Sign in{' '}
-              <LoaderCircle size={16} className="text-white btn-spinner" />
+              <LoaderCircle size={16} className="text-black btn-spinner" />
             </span>
           ) : (
             <span>Sign in</span>

@@ -1,3 +1,7 @@
+'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+
 import {
   Pagination,
   PaginationContent,
@@ -13,14 +17,23 @@ import BlogsNotFound from '@/components/blogs-not-found';
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
-  handlePageChange: (page: number) => void;
 }
 
 const PaginationControls = ({
   currentPage,
   totalPages,
-  handlePageChange,
 }: PaginationControlsProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set('page', newPage.toString());
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   // always show three page numbers centered around current page
   const getVisiblePages = () => {
     if (totalPages <= 3) {
@@ -54,7 +67,10 @@ const PaginationControls = ({
   return (
     <Pagination className="flex items-center justify-center space-x-2">
       <PaginationContent>
-        <PaginationItem className="cursor-pointer" hidden={currentPage === 1}>
+        <PaginationItem
+          className="cursor-pointer hidden xs:block"
+          hidden={currentPage === 1}
+        >
           <PaginationPrevious
             size={'default'}
             href={currentPage === 2 ? '' : `?page=${currentPage - 1}`}
@@ -82,7 +98,7 @@ const PaginationControls = ({
         )}
 
         <PaginationItem
-          className="cursor-pointer"
+          className="cursor-pointer hidden xs:block"
           hidden={currentPage === totalPages}
         >
           <PaginationNext
