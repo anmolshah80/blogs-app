@@ -56,8 +56,6 @@ export async function login(formData: TLoginFormData) {
 
     await createSession(existingUser.id);
   } catch (error) {
-    console.log('catch-block error: ', error);
-
     return {
       errors: {
         email: {

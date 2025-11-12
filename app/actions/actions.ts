@@ -84,6 +84,7 @@ const updatePost = async (
     }
 
     revalidatePath('/blogs');
+    revalidatePath(`/blogs/${postId}/edit`);
 
     return {
       updatedPostData: updatedPost,

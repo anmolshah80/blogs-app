@@ -147,7 +147,7 @@ const CreateForm = () => {
             fieldHasErrors={errors.blogCategory}
             fieldDescription={
               <span className="flex items-center text-xs">
-                Add comma-separated values such as React, Next.js, Tailwind CSS,
+                Add comma-separated values such as react, next.js, tailwind css,
                 etc.
               </span>
             }
