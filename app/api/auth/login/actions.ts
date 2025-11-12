@@ -56,11 +56,13 @@ export async function login(formData: TLoginFormData) {
 
     await createSession(existingUser.id);
   } catch (error) {
+    console.log('catch-block error: ', error);
+
     return {
       errors: {
         email: {
           prismaErrorMessage:
-            error instanceof Error ? error.message : '401 Unauthorized',
+            error instanceof Error ? error : '401 Unauthorized',
           message: 'Invalid email or password',
           type: 'invalid_email_address',
         },
@@ -89,6 +91,10 @@ export async function register(formData: TRegisterFormData) {
       data: {
         email: formData.email,
         hashedPassword: hashedPassword,
+      },
+      select: {
+        id: true,
+        email: true,
       },
     });
 
