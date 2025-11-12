@@ -1,7 +1,7 @@
 // to only allow the server components to import and use the util functions declared here
 import 'server-only';
 
-import { unstable_cache } from 'next/cache';
+// import { unstable_cache } from 'next/cache';
 
 import prisma from '@/lib/db';
 import { TPost } from '@/lib/types';
@@ -16,41 +16,39 @@ type GetPostsResponse = {
   error?: string;
 };
 
-const getPost = unstable_cache(
-  async (postId: string): Promise<GetPostResponse> => {
-    try {
-      const post = await prisma.post.findUnique({
-        where: {
-          id: postId,
-        },
-      });
+const getPost = async (postId: string): Promise<GetPostResponse> => {
+  try {
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
 
-      // if (!post) return notFound();
+    // if (!post) return notFound();
 
-      if (!post) {
-        return {
-          postData: undefined,
-          error: 'Post not found',
-        };
-      }
-
-      return {
-        postData: post,
-        error: undefined,
-      };
-    } catch (error) {
+    if (!post) {
       return {
         postData: undefined,
-        error:
-          error instanceof Error
-            ? error.message
-            : `An error occurred while fetching the blog post with ID ${postId}`,
+        error: 'Post not found',
       };
     }
-  },
-);
 
-const getPosts = unstable_cache(async (): Promise<GetPostsResponse> => {
+    return {
+      postData: post,
+      error: undefined,
+    };
+  } catch (error) {
+    return {
+      postData: undefined,
+      error:
+        error instanceof Error
+          ? error.message
+          : `An error occurred while fetching the blog post with ID ${postId}`,
+    };
+  }
+};
+
+const getPosts = async (): Promise<GetPostsResponse> => {
   try {
     const postsData = await prisma.post.findMany({
       orderBy: {
@@ -79,6 +77,6 @@ const getPosts = unstable_cache(async (): Promise<GetPostsResponse> => {
           : 'An error occurred while fetching the blog posts',
     };
   }
-});
+};
 
 export { getPost, getPosts };
