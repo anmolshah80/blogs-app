@@ -130,3 +130,4 @@
 ## Notes
 
 - [bcrypt.js](https://github.com/dcodeIO/bcrypt.js)
+- [prisma db reset that resets the database, pushes the schema, and runs the seed function #11261](https://github.com/prisma/prisma/issues/11261)
